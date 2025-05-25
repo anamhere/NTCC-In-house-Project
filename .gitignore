@@ -9,3 +9,4 @@
 !app.py
 !send_expiry_notifications.py
 !.gitignore
+.env

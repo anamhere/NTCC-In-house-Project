@@ -3,22 +3,24 @@ from email.mime.text import MIMEText
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import dateparser
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # --- CONFIG ---
 
 # MongoDB connection string
-MONGO_URI = "mongodb+srv://Armanwarraich:<Arman4496>@cluster0.ajavpti.mongodb.net/"
+MONGO_URI = os.environ["MONGO_URI"]
 DB_NAME = "grocery_db"
 COLLECTION_NAME = "products"
 
 # Email config - replace with your details
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-EMAIL_ADDRESS = "your_email@gmail.com"
-EMAIL_PASSWORD = "your_app_password"  # Use App Password for Gmail
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")"
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 587)
+EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"] # Use App Password for Gmail
 
 # Recipient email (could be same as sender or user email)
-TO_EMAIL = "recipient_email@gmail.com"
+TO_EMAIL = os.environ["TO_EMAIL"]
 
 # --- FUNCTION TO SEND EMAIL ---
 def send_email(subject, body, to_email):
