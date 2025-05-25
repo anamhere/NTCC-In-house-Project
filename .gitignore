@@ -10,3 +10,5 @@
 !send_expiry_notifications.py
 !.gitignore
 .env
+!scheduler.py
+!requirements.txt

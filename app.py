@@ -7,33 +7,26 @@ from datetime import datetime, timedelta
 import re
 import cv2
 import numpy as np
-
-
-
-
+import os
+from scheduler import start_scheduler
 
 # --- Page config ---
-
-
-
 st.set_page_config(page_title="AI Grocery Expiry Tracker", page_icon="🧠")
 
 st.title("🧠 AI Grocery Expiry Tracker")
 st.subheader("Track your grocery expiry dates easily!")
-st.info("You can manually enter grocery items or upload a photo to detect expiry dates. Let’s get started!")
+st.info("You can manually enter grocery items or upload a photo to detect expiry dates. Let's get started!")
 
-
-
-
-
+# --- Start the email scheduler ---
+if 'scheduler_started' not in st.session_state:
+    start_scheduler()
+    st.session_state.scheduler_started = True
+    st.success("📧 Email notification scheduler is running!")
 
 # --- MongoDB Setup ---
-client = MongoClient("mongodb+srv://Armanwarraich:Arman4496@groceryexpirytracker.piw9elf.mongodb.net/")
+client = MongoClient(os.environ["MONGO_URI"])
 db = client["grocery_db"]
 collection = db["products"]
-
-
-
 
 # --- Helper Function ---
 def preprocess_image(image):
@@ -45,10 +38,6 @@ def preprocess_image(image):
         cv2.THRESH_BINARY_INV, 11, 2
     )
     return thresh
-
-
-
-
 
 # --- Manual Entry ---
 st.header("Add Item Manually")
@@ -63,11 +52,6 @@ with st.form("manual_entry_form"):
             st.success(f"Added **{name}**, expiring on {expiry_date}")
         else:
             st.error("Please enter a product name")
-
-
-
-
-
 
 # --- Image Upload Entry ---
 st.header("Add Item via Image")
@@ -105,20 +89,9 @@ if uploaded_image:
     else:
         st.warning("No expiry date detected in the image.")
 
-
 # --- Upload Size Display ---
 current_upload_size = st.get_option("server.maxUploadSize")
 st.write(f"Current max upload size: {current_upload_size} MB")
-
-
-
-
-
-
-
-
-
-
 
 # --- Filters Above Stored Products ---
 st.header("Stored Products")
@@ -200,12 +173,3 @@ if st.session_state.show_products:
                     collection.delete_one({"_id": p["_id"]})
                     st.success(f"Deleted product: {name}")
                     st.experimental_rerun()
-
-
-
-
-
-
-
-
-
