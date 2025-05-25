@@ -12,3 +12,5 @@
 .env
 !scheduler.py
 !requirements.txt
+!daily-email.yml
+!workflows
