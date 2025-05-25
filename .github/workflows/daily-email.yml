@@ -31,4 +31,4 @@ jobs:
         TO_EMAIL: ${{ secrets.TO_EMAIL }}
         SMTP_SERVER: smtp.gmail.com
         SMTP_PORT: 587
-      run: python send_expiry_requirements.py
+      run: python send_expiry_notifications.py
