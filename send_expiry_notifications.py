@@ -4,74 +4,104 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import dateparser
 import os
-from dotenv import load_dotenv
-load_dotenv()
-# --- CONFIG ---
 
+# --- CONFIG ---
 # MongoDB connection string
 MONGO_URI = os.environ["MONGO_URI"]
 DB_NAME = "grocery_db"
 COLLECTION_NAME = "products"
 
-# Email config - replace with your details
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")"
-SMTP_PORT = int(os.environ.get("SMTP_PORT", 587)
+# Email config
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
 EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
-EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"] # Use App Password for Gmail
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]  # Use App Password for Gmail
 
-# Recipient email (could be same as sender or user email)
+# Recipient email
 TO_EMAIL = os.environ["TO_EMAIL"]
 
 # --- FUNCTION TO SEND EMAIL ---
 def send_email(subject, body, to_email):
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = EMAIL_ADDRESS
-    msg["To"] = to_email
+    try:
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = EMAIL_ADDRESS
+        msg["To"] = to_email
 
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
-        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.send_message(msg)
-    print("Notification email sent.")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.send_message(msg)
+        print("✅ Notification email sent successfully.")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+        return False
 
 # --- MAIN ---
 def main():
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
-    collection = db[COLLECTION_NAME]
+    try:
+        print("🔍 Connecting to MongoDB...")
+        client = MongoClient(MONGO_URI)
+        db = client[DB_NAME]
+        collection = db[COLLECTION_NAME]
 
-    now = datetime.now()
-    target_date = now + timedelta(days=3)
+        # Test connection
+        client.admin.command('ping')
+        print("✅ MongoDB connection successful")
 
-    # Query items expiring exactly in 3 days (+- one day to be safe)
-    lower_bound = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    upper_bound = target_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+        now = datetime.now()
+        target_date = now + timedelta(days=3)
 
-    products = list(collection.find({
-        "expiry": {
-            "$gte": lower_bound,
-            "$lte": upper_bound
-        }
-    }))
+        print(f"📅 Checking for products expiring on: {target_date.strftime('%Y-%m-%d')}")
 
-    if not products:
-        print("No products expiring in 3 days. No email sent.")
-        return
+        # Query items expiring exactly in 3 days (+- some hours to be safe)
+        lower_bound = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        upper_bound = target_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Prepare email content
-    body = "The following products are expiring in 3 days:\n\n"
-    for p in products:
-        name = p.get("name", "Unnamed")
-        expiry = p.get("expiry")
-        if isinstance(expiry, str):
-            expiry = dateparser.parse(expiry)
-        exp_str = expiry.strftime("%Y-%m-%d") if expiry else "Unknown"
-        body += f"- {name} (Expiry: {exp_str})\n"
+        products = list(collection.find({
+            "expiry": {
+                "$gte": lower_bound,
+                "$lte": upper_bound
+            }
+        }))
 
-    # Send the email
-    send_email("Grocery Expiry Reminder - Items Expiring Soon", body, TO_EMAIL)
+        print(f"📦 Found {len(products)} products expiring in 3 days")
 
+        if not products:
+            print("✅ No products expiring in 3 days. No email needed.")
+            return
+
+        # Prepare email content
+        body = "🚨 GROCERY EXPIRY ALERT 🚨\n\n"
+        body += f"The following {len(products)} product(s) are expiring in 3 days:\n\n"
+        
+        for i, p in enumerate(products, 1):
+            name = p.get("name", "Unnamed Product")
+            expiry = p.get("expiry")
+            if isinstance(expiry, str):
+                expiry = dateparser.parse(expiry)
+            exp_str = expiry.strftime("%Y-%m-%d") if expiry else "Unknown"
+            body += f"{i}. 📦 {name}\n   📅 Expires: {exp_str}\n\n"
+
+        body += "⏰ Don't forget to use or dispose of these items soon!\n\n"
+        body += "---\n"
+        body += "🤖 This is an automated reminder from your AI Grocery Expiry Tracker.\n"
+        body += f"📧 Sent on: {now.strftime('%Y-%m-%d at %H:%M:%S UTC')}"
+
+        # Send the email
+        subject = f"🚨 {len(products)} Grocery Item(s) Expiring Soon!"
+        
+        if send_email(subject, body, TO_EMAIL):
+            print(f"✅ Successfully sent expiry notification for {len(products)} products")
+        else:
+            print("❌ Failed to send notification email")
+
+    except Exception as e:
+        print(f"❌ Error in main function: {e}")
+        raise e
 
 if __name__ == "__main__":
+    print("🚀 Starting grocery expiry check...")
     main()
+    print("🏁 Grocery expiry check completed!")
