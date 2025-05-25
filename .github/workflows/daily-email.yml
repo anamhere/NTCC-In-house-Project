@@ -23,7 +23,7 @@ jobs:
       run: |
         pip install pymongo python-dotenv dateparser
         
-    - name: Send expiry notifications
+    - name: send_expiry_requirements.py
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
         EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
