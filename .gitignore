@@ -1,0 +1,11 @@
+# 1. Ignore everything
+*
+
+# 2. But don’t ignore directories (so Git can recurse)
+!*/
+
+# 3. Whitelist these files (including .gitignore itself)
+!README.md
+!app.py
+!send_expiry_notifications.py
+!.gitignore
