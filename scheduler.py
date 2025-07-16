@@ -3,6 +3,7 @@ import time
 import threading
 from send_expiry import main as send_expiry_notifications
 
+
 def run_scheduler():
     """Run the scheduler in a separate thread"""
     # Schedule to run daily at 9 AM

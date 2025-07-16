@@ -4,6 +4,49 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import dateparser
 import os
+from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
+import os
+from pymongo import MongoClient
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get the URI from .env
+mongo_uri = os.getenv("MONGO_URI")
+
+# Connect to MongoDB
+print("Connecting to MongoDB...")
+client = MongoClient(mongo_uri)
+client.admin.command("ping")
+print("✅ Successfully connected to MongoDB!")
+
+# Optional: Verify DB and collection
+db = client["grocery_db"]
+print("✅ Using database:", db.name)
+
+load_dotenv()  # This loads variables from .env
+
+# Now safely access them
+MONGO_URI = os.environ["MONGO_URI"]
+EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
+TO_EMAIL = os.environ["TO_EMAIL"]
+
+load_dotenv()  # Loads variables from .env
+
+MONGO_URI = os.environ["MONGO_URI"]
+EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
+
+load_dotenv()  # Load variables from .env
+
+MONGO_URI = os.environ["MONGO_URI"]
 
 # --- CONFIG ---
 # MongoDB connection string
@@ -105,3 +148,7 @@ if __name__ == "__main__":
     print("🚀 Starting grocery expiry check...")
     main()
     print("🏁 Grocery expiry check completed!")
+from pymongo import MongoClient
+
+client = MongoClient("mongodb+srv://anamherehehe:8JMLZ5Zv7OcWc26B@notesdb.388xh.mongodb.net/grocery_db?retryWrites=true&w=majority&appName=notesDB")
+print(client.list_database_names())
