@@ -1,7 +1,7 @@
 import schedule
 import time
 import threading
-from send_expiry import main as send_expiry_notifications
+from send_expiry_notifications import main as send_expiry_notifications
 
 
 def run_scheduler():
