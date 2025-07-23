@@ -14,3 +14,4 @@
 !requirements.txt
 !daily-email.yml
 !workflows
+!ocr.py
