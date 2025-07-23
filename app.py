@@ -5,11 +5,9 @@ import dateparser
 import random
 import pandas as pd
 import plotly.express as px
-from db import db, collection
 from scheduler import start_scheduler
 from ocr import extract_expiry_date
 from utils import get_expiry_status
-from fpdf import FPDF
 import re
 from bson.objectid import ObjectId
 import copy
